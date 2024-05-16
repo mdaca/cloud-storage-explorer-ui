@@ -1,0 +1,18 @@
+<div style="margin-bottom: 4px;
+border-bottom: 1px #d3d3d3 solid;
+padding-bottom: 4px;">
+    <div class="grid-row"  #target tabindex="0" >
+      <div class="grid-cell" style="width:330px; display:inline-block">
+        <kendo-progressbar [value]="actionaudit.percentComplete"></kendo-progressbar>
+      </div>
+      <div class="grid-cell" style="width:30px; display:inline-block;height:24px;vertical-align: bottom;">
+        <span class="material-icons"  (click)="abort()" title="Abort Action" style="cursor:pointer">
+            cancel
+        </span>
+      </div>
+      <div class="grid-cell" style="display:inline-block" >
+      {{actionaudit.action == 'batch_copy' ? 'Copied' : 'Moved'}} {{actionaudit.bytesTransferred | number}} items of {{actionaudit.totalBytes}} to {{actionaudit.destPath}}
+      </div>
+    </div>
+  </div>
+

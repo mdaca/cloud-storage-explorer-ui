@@ -1,0 +1,128 @@
+@import url("https://fonts.googleapis.com/icon?family=Material+Icons");
+
+/* You can add global styles to this file, and also import other style files */
+$material-design-icons-font-directory-path: '~material-design-icons-iconfont/dist/fonts/';
+
+@import '~material-design-icons-iconfont/src/material-design-icons';
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.cdk-virtual-scroll-orientation-vertical .cdk-virtual-scroll-content-wrapper {
+  width: 100%;
+}
+
+/**BEGIN grid */
+
+//makes the arrows in sorting use KendoUI icons
+.k-i-sort-asc-sm::before {
+  content: '\e013';
+  color: black;
+}
+
+.k-i-sort-desc-sm::before {
+  content: '\e015';
+  color: black;
+}
+
+/**END grid */
+
+//admin tabs
+.k-tabstrip-items .k-item {
+  color: black;
+}
+
+//--begin 508 compliance--
+// needs black on green for optimal contrast
+//active menu tab
+li.active a {
+  color: black !important;
+}
+
+//make selected item in treeviews have black text
+li.k-treeview-item[aria-selected='true'] span:nth-child(2) {
+  color: black
+}
+
+//--end 508 compliance--
+
+.k-splitter .k-scrollable {
+  overflow: hidden;
+}
+
+.center-button {
+  text-align: center;
+  display: table-cell;
+  padding: 4px !important;
+}
+
+.left-btn {
+  margin-left: 25%;
+  margin-right: 5px;
+  //center the button
+  text-align: center;
+  display: table-cell;
+  padding: 4px !important;
+}
+
+.right-btn {
+  margin-right: 25%;
+  margin-left: 5px;
+  //center the button
+  text-align: center;
+  display: table-cell;
+  padding: 4px !important;
+}
+
+.picker-command-buttons {
+  flex-direction: row;
+  box-sizing: border-box;
+  display: flex;
+  padding: 10px;
+}
+
+.spinner-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  font-size: 64px;
+  background-color: rgba(255, 255, 255, 0.3);
+  color: #74aa50;
+}
+
+.k-button.k-primary:hover {
+  background-color: #6f9a48 !important;
+  color: #fff !important;
+  border-color: #74aa50 !important;
+}
+
+.k-button.k-primary:active {
+  background-color: #74aa50 !important;
+  color: #fff !important;
+  border-color: #74aa50 !important;
+}
+
+.k-button.k-primary.button-danger, .k-button.k-primary.button-danger:active {
+  background-color: #ff6358 !important;
+  color: white !important;
+  border-color: #d0372e !important;
+}
+
+.k-button.k-primary.button-danger:hover {
+  background-color: #f34f45 !important;
+  color: white !important;
+  border-color: #e03e34 !important;
+}
+
+//admin tab hover color
+li .k-link:hover {
+  color: #74aa50;
+}

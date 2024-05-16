@@ -1,0 +1,31 @@
+<div title="{{upDirItem ? 'Double-click to navigate up a level' : 'Right click for options...'}}">
+  <div class="grid-row" #target tabindex="0" (dblclick)="doubleClick()"
+       [ngClass]="getClass()">
+
+    <div class="grid-cell" fxLayout="column" fxFlex="30px">
+      <mat-checkbox *ngIf="upDirItem == false" [(ngModel)]="driveItem.checked" title="Checkbox"
+                    [disabled]="disabled" (ngModelChange)="checkboxToggled.emit()"></mat-checkbox>
+    </div>
+    <div class="grid-cell" fxLayout="column" fxFlex="30px">
+      <span [ngClass]="driveItem.directory ? 'material-icons' : driveItem.getIconClass()">
+        {{driveItem.directory || upDirItem ? "folder" : "description"}}
+      </span>
+    </div>
+    <div class="grid-cell" fxLayout="column" fxFlex title="{{upDirItem ? 'Double-click to navigate up a level' : driveItem.displayName}}">
+      {{upDirItem ? '..' : driveItem.displayName}}
+    </div>
+    <div class="grid-cell" fxLayout="column" fxFlex="160px">
+      {{upDirItem || driveItem.directory ? "-" : driveItem.modifiedDate | date:'MM/dd/yyyy HH:mm'}}
+    </div>
+    <div class="grid-cell" fxLayout="column" fxFlex="80px">
+      {{upDirItem || driveItem.directory ? '-' : driveItem.getDisplayBytes()}}
+    </div>
+    <div class="grid-cell" fxLayout="column" fxFlex="145px"
+         title="{{getStorageClassTitle()}}">
+      {{getStorageClassDisplay()}}
+    </div>
+  </div>
+</div>
+<kendo-contextmenu #menu (popupOpen)="onPopupOpen($event)" *ngIf="!upDirItem" [target]="target"
+                   [items]="dropdownButtons" (select)="selectEventHandler($event)"
+                   [ngClass]="driveItem.hidden ? 'hidden' : ''"></kendo-contextmenu>

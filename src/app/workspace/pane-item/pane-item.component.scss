@@ -1,0 +1,41 @@
+div.grid-cell {
+  color: rgba(0, 0, 0, .8);
+  padding: 7px 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+div.grid-row {
+  border-bottom: 1px solid rgb(218, 220, 224);
+  cursor: default;
+}
+
+div.grid-row:hover {
+  background-color: rgba(0, 0, 0, .027);
+}
+
+span.material-icons, .k-icon {
+  font-size: 21px;
+  margin-top: -1px;
+}
+
+::ng-deep .mat-checkbox .mat-checkbox-frame {
+  border: 1px solid rgb(218, 220, 224);
+}
+
+::ng-deep .mat-checkbox {
+  margin-left: 6px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.archived .grid-cell {
+  color: rgba(0, 0, 0, .6) !important;
+}
+
+::ng-deep .mat-checkbox-indeterminate.mat-accent .mat-checkbox-background, ::ng-deep .mat-checkbox-checked.mat-accent .mat-checkbox-background {
+  background-color: #74aa50;
+}

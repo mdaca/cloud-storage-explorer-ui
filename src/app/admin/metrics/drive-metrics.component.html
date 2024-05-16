@@ -1,0 +1,175 @@
+<div [formGroup]="filterForm" class="filter-fields" fxFlex orientation="vertical" fxLayout="column">
+    <div>
+        <kendo-label
+                class="k-checkbox-label"
+                [for]="driveDropdown"
+                text="Drive:">
+        </kendo-label>
+        <kendo-dropdownlist
+                formControlName="drive"
+                #driveDropdown
+                [data]="drives"
+                (valueChange)="refreshDriveMetrics()"
+                textField="displayName"
+                valueField="driveId">
+        </kendo-dropdownlist>
+    </div>
+    <div>
+        <kendo-daterange>
+            <label style="margin-right: 15px">
+                <span class="label">Start:</span>
+                <kendo-dateinput kendoDateRangeStartInput formControlName="startDate"
+                                 (valueChange)="updateDiscUsageChart()">
+                </kendo-dateinput>
+            </label>
+            <label>
+                <span class="label">End:</span>
+                <kendo-dateinput kendoDateRangeEndInput formControlName="endDate"
+                                 (valueChange)="updateDiscUsageChart()">
+                </kendo-dateinput>
+            </label>
+        </kendo-daterange>
+    </div>
+    <div>
+        <kendo-label [for]="maxRecords" text="Max Records:" class="label"></kendo-label>
+        <kendo-numerictextbox #maxRecords formControlName="maxRecords" [format]="'n0'" [min]="1"
+                              (valueChange)="updateDiscUsageChart()">
+        </kendo-numerictextbox>
+    </div>
+</div>
+<div class="error-message" *ngIf="cannotConnectToDrive">
+    <span class="material-icons" style="font-size: 38px">link_off</span>
+    <div style="font-size: 18px">Unable to establish connection to drive!</div>
+</div>
+<kendo-splitter class="drive-metrics-splitter" fxFlex orientation="vertical" fxLayout="column"
+                *ngIf="!cannotConnectToDrive">
+    <kendo-splitter-pane [resizable]="false">
+        <div id="usageDataErrorMessage"
+             *ngIf="!driveHasUsageData"
+             [ngClass]="driveHasUsageData ? 'ng-star-inserted animate-if' : ''">
+            <span class="material-icons">warning_amber</span>
+            <div>Drive does not have any usage data between this range</div>
+        </div>
+        <kendo-chart *ngIf="driveHasUsageData" style="height: 100%">
+            <kendo-chart-title text="Drive Usage"></kendo-chart-title>
+            <kendo-chart-value-axis>
+                <kendo-chart-value-axis-item [min]="gridMin" [max]="gridMax" [majorUnit]="gridMajorUnit">
+                    <kendo-chart-value-axis-item-labels [content]='discSizeFormatter'>
+                    </kendo-chart-value-axis-item-labels>
+                </kendo-chart-value-axis-item>
+            </kendo-chart-value-axis>
+            <kendo-chart-category-axis>
+                <kendo-chart-category-axis-item [majorGridLines]="{step: discUsageStep}"
+                                                [categories]="driveUsagesDates">
+                    <kendo-chart-category-axis-item-labels [step]="discUsageStep">
+                    </kendo-chart-category-axis-item-labels>
+                </kendo-chart-category-axis-item>
+            </kendo-chart-category-axis>
+            <kendo-chart-series>
+                <kendo-chart-series-item
+                        type="line"
+                        [data]="driveUsagesBytes">
+                    <!--hover tooltip-->
+                    <kendo-chart-series-item-tooltip>
+                        <ng-template let-bytes="dataItem">
+                            {{ getDisplayBytes(bytes) }}
+                        </ng-template>
+                    </kendo-chart-series-item-tooltip>
+                </kendo-chart-series-item>
+            </kendo-chart-series>
+        </kendo-chart>
+    </kendo-splitter-pane>
+    <kendo-splitter-pane>
+        <kendo-splitter style="height: 369px" fxLayout="row" fxFlex>
+            <kendo-splitter-pane size="450px" [collapsible]="true" style="overflow:auto">
+                <div *ngIf="foldersByDrive.length">
+                    <div class="sticky-button-group">
+                        <button kendoButton (click)="goToRootFolderUsage()" [disabled]="selectedFolderIsDrive()">
+                            Return to root
+                        </button>
+                        <button kendoButton (click)="goToParentFolderUsage()" [disabled]="selectedFolderIsDrive()">
+                            Go up directory
+                        </button>
+                    </div>
+                    <kendo-treeview
+                            title=""
+                            [nodes]="foldersByDrive"
+                            textField="displayName"
+                            selectBy="path"
+                            expandBy="path"
+                            kendoTreeViewExpandable
+                            kendoTreeViewSelectable
+                            kendoTreeViewHierarchyBinding
+                            [hasChildren]="hasChildren"
+                            [children]="fetchChildren"
+                            (selectionChange)="displayFolderUsage($event.dataItem)"
+                            [(selectedKeys)]="selectedFolderKeys"
+                            [(expandedKeys)]="expandedFolderKeys"
+                            style="overflow: initial">
+                        <ng-template kendoTreeViewNodeTemplate let-driveItem>
+                          <span class="nav-item" [attr.data-driveId]="driveItem.driveId"
+                                title="Open {{driveItem.displayName}}">
+                            <span class="k-icon k-i-folder"></span>
+                              {{ driveItem.displayName }}
+                          </span>
+                        </ng-template>
+                    </kendo-treeview>
+                </div>
+            </kendo-splitter-pane>
+            <kendo-splitter-pane class="content" fxLayout="column" fxFlex>
+                <div class="k-i-loading spinner-bg" *ngIf="isLoadingFolderUsage"></div>
+                <div *ngIf="!isLoadingFolderUsage" style="height: 100%">
+                    <div id="folder-title">{{getFolderUsageDisplay(selectedFolder)}}</div>
+                    <div class="error-message" *ngIf="folderUsageErrorMessage">
+                        <span class="k-icon k-i-folder-open"></span>
+                        <div>
+                            {{folderUsageErrorMessage}}
+                        </div>
+                    </div>
+                    <kendo-chart *ngIf="!folderUsageErrorMessage"
+                                 (seriesClick)="openFolderUsage($event.dataItem)"
+                                 style="height:94%; width: 100%">
+                        <kendo-chart-series>
+                            <kendo-chart-series-item
+                                    type="pie"
+                                    [data]="folderUsage"
+                                    field="fileSize"
+                                    categoryField="category"
+                                    [labels]="{ visible: true, content: folderSizeFormatter }">
+                                <kendo-chart-series-item-tooltip>
+                                    <ng-template let-bytes="dataItem">
+                                        {{ bytes.getFileSizeDisplay() }}
+                                    </ng-template>
+                                </kendo-chart-series-item-tooltip>
+                            </kendo-chart-series-item>
+                        </kendo-chart-series>
+                    </kendo-chart>
+                </div>
+            </kendo-splitter-pane>
+            <kendo-splitter-pane size="450px" [collapsible]="true">
+                <kendo-grid [data]="gridViewFolderUsage"
+                            [sortable]="{ allowUnsort: false, mode: 'single'}"
+                            [sort]="sortFolderUsage"
+                            (sortChange)="sortChange($event)"
+                            style="height: 100%">
+                    <kendo-grid-column field="path" [width]="275" title="Folder Name">
+                        <ng-template kendoGridCellTemplate let-folderUsage>
+                            {{ folderUsage.getFileName() }}
+                        </ng-template>
+                        <ng-template kendoGridFooterTemplate>
+                            {{folderUsageFull.length}}
+                        </ng-template>
+                    </kendo-grid-column>
+                    <kendo-grid-column field="fileSize" title="Size" filter="numeric" [width]="150">
+                        <ng-template kendoGridCellTemplate let-folderUsage>
+                            {{ folderUsage.getDisplayBytes() }}
+                        </ng-template>
+                        <ng-template kendoGridFooterTemplate>
+                            {{getDisplayBytes(getTotalFolderUsageBytes(folderUsageFull))}}
+                        </ng-template>
+                    </kendo-grid-column>
+                </kendo-grid>
+            </kendo-splitter-pane>
+        </kendo-splitter>
+    </kendo-splitter-pane>
+</kendo-splitter>

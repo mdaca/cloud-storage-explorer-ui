@@ -1,0 +1,26 @@
+<kendo-tabstrip tabPosition="left">
+    <kendo-tabstrip-tab title="History" [selected]="true">
+      <ng-template kendoTabContent>
+          <textarea [(ngModel)]=messageText readonly=readonly name=messages title="{{title}}"></textarea>  
+        </ng-template>
+    </kendo-tabstrip-tab>
+    <kendo-tabstrip-tab title="In-Progress">
+        <ng-template kendoTabContent>
+            <cdk-virtual-scroll-viewport itemSize="20" style="height: calc(100%); width:100%; overflow-y: auto;">
+                <app-transfer-item *cdkVirtualFor="let item of auditItems" (aborted)="abort($event)"
+                               [actionaudit]=item cdkDrag></app-transfer-item>
+              </cdk-virtual-scroll-viewport>
+        </ng-template>
+    </kendo-tabstrip-tab>
+</kendo-tabstrip>
+
+
+<kendo-dialog title="Please confirm" *ngIf="opened" (close)="close()"  [minWidth]="250"
+[width]="450" >
+<p class="modal-text">Are you sure you want to abort this copy/move?</p>
+
+<div class="picker-command-buttons">
+<button kendoButton (click)="abortCommit()" style="margin-left: 4px" themeColor="primary">Yes</button>
+<button kendoButton (click)="close()">No</button>
+</div>
+</kendo-dialog>

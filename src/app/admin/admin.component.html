@@ -1,0 +1,12 @@
+<main>
+  <kendo-tabstrip  (tabSelect)="validatedNavigation($event)" #tabStrip>
+    <kendo-tabstrip-tab *ngFor="let tab of tabs"
+                        [selected]="tab.title === activeTab.title"
+                        [title]="tab.title">
+      <ng-template kendoTabContent>
+        <router-outlet></router-outlet>
+      </ng-template>
+    </kendo-tabstrip-tab>
+  </kendo-tabstrip>
+</main>
+

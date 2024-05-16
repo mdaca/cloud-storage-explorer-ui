@@ -1,0 +1,171 @@
+:host {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+.cdk-drop-list-dragging {
+  background: rgb(218, 220, 224, .2);
+}
+
+.tree-parent {
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-top: 4px;
+  padding-bottom: 6px;
+  width: calc(100% - 4px);
+
+  > button {
+    min-height: 36px;
+  }
+}
+
+.pane-footer {    height: 22px;
+  position: absolute;
+  bottom: 0;
+  right: 17px;
+  text-align: right;
+  margin-bottom: -2px;
+}
+
+.pane-footer-text-item {
+  color: rgba(0,0,0,.45);
+    display: inline-block;
+    padding-right: 4px;
+    border-left: 1px solid #ececec;
+    padding-left: 2px;
+    background: #ececec;
+    border-top: 1px solid #ececec;
+    z-index: 999;
+}
+
+.upload-parent, .search-parent {
+  margin-bottom: 8px;
+  padding-left: 4px;
+  padding-right: 4px;
+  width: calc(100% - 4px);
+}
+
+mat-radio-group {
+  margin-bottom: 22px;
+  display: block;
+  margin-left: 48px;
+  margin-top: -12px;
+}
+
+mat-radio-button {
+  padding: 4px;
+
+}
+
+::ng-deep .mat-radio-button.mat-accent .mat-radio-ripple .mat-ripple-element {
+  background-color: #74aa50 !important;
+}
+
+::ng-deep .mat-radio-button.mat-accent .mat-radio-inner-circle {
+  background-color: #74aa50 !important; /*inner circle color change*/
+}
+
+::ng-deep.mat-radio-button.mat-accent.mat-radio-checked .mat-radio-outer-circle {
+  border-color: #74aa50 !important; /*outer ring color change*/
+}
+
+::ng-deep.mat-radio-button.mat-accent .mat-radio-outer-circle {
+  border-color: gray !important; /*outer ring color change*/
+}
+
+button {
+  width: 100%;
+  justify-content: left;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #000 50%),
+  linear-gradient(135deg, #000 50%, transparent 50%) !important;
+  background-position: calc(100% - 0.7rem) 1rem,
+  calc(100% - 0.4rem) 1rem;
+  background-size: 0.3rem 0.3rem,
+  0.3rem 0.3rem;
+  background-repeat: no-repeat;
+  padding-right: 1.25rem;
+}
+
+.material-icons {
+  cursor: pointer;
+}
+
+.pane-header-row span.material-icons {
+  margin-top: -3px;
+}
+
+.k-window {
+  position: fixed !important;
+}
+
+kendo-popup {
+  min-width: 38%;
+
+  kendo-treeview {
+    max-height: calc(60vh);
+    width: 100%;
+  }
+}
+
+.pane-header-row {
+  font-weight: bold;
+  border-bottom: 1px solid rgb(218, 220, 224);
+  padding-right: 15px;
+
+  div {
+    cursor: pointer;
+  }
+}
+
+.picker-command-buttons .k-button {
+  background-image: none !important;
+}
+
+.picker-command-text {
+  margin-bottom: 12px;
+}
+
+.picker-selected-folder {
+  border-bottom: 1px solid #ccc;
+  padding: 15px;
+}
+
+$primary: #74aa50;
+$dialog-titlebar-bg: #74aa50;
+
+.window-holder kendo-dialog-titlebar, .window-holder .k-dialog-titlebar {
+  $primary: #74aa50;
+  $dialog-titlebar-bg: #74aa50;
+  background-color: #74aa50 !important;
+}
+
+kendo-window {
+  max-height: 600px;
+  width: 500px;
+}
+
+.window-holder kendo-window-titlebar {
+  background-color: #74aa50 !important;
+}
+
+.folder-picker-footer {
+  background: white;
+  position: sticky;
+  padding: 20px;
+  border-top: 1px solid #ccc
+}
+
+.modal-text {
+  padding: 15px;
+  text-align: center;
+}
+
+.select-all-checkbox {
+  margin: -8px 8px 6px -1px;
+}
+
+.pane-header {
+  flex: 0 1 auto;
+}

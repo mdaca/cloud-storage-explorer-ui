@@ -1,0 +1,164 @@
+<div class="audit-stats">
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="audit-stat">
+                <div class="stat-label">Total Actions In Progress</div>
+                <div>
+                    {{auditStatistics.getTotalPending()}}
+                </div>
+                <kendo-sparkline [data]="auditStatistics.totalArray" type="area"></kendo-sparkline>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="audit-stat">
+                <div class="stat-label">Download/Previews In Progress</div>
+                <div>
+                    {{auditStatistics.getDownloadTotal()}}
+                </div>
+                <kendo-sparkline [data]="auditStatistics.downloadArray" type="area"></kendo-sparkline>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="audit-stat">
+                <div class="stat-label">Uploads In Progress</div>
+                <div>
+                    {{auditStatistics.getUploadTotal()}}
+                </div>
+                <kendo-sparkline [data]="auditStatistics.uploadArray" type="area"></kendo-sparkline>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="audit-stat">
+                <div class="stat-label">Deletes In Progress</div>
+                <div>
+                    {{auditStatistics.delete}}
+                </div>
+                <kendo-sparkline [data]="auditStatistics.deleteArray" type="area"></kendo-sparkline>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="audit-stat">
+                <div class="stat-label">Move/Copy/Renames In Progress</div>
+                <div>
+                    {{auditStatistics.getMoveTotal()}}
+                </div>
+                <kendo-sparkline [data]="auditStatistics.moveArray" type="area"></kendo-sparkline>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="audit-stat">
+                <div class="stat-label">Extracts In Progress</div>
+                <div>
+                    {{auditStatistics.extract}}
+                </div>
+                <kendo-sparkline [data]="auditStatistics.extractArray" type="area"></kendo-sparkline>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="audit-grid">
+    <kendo-grid [data]="viewAudit"
+                [pageSize]="gridStateAudit.take || 20"
+                [skip]="gridStateAudit.skip || 0"
+                [sort]="gridStateAudit.sort || []"
+                [pageable]="true"
+                [sortable]="true"
+                (dataStateChange)="onStateChangeAudit($event)"
+                [navigable]="true"
+                [filterable]="true"
+                [filter]="gridStateAudit.filter || {logic: 'and', filters: []}">
+        <div *kendoGridDetailTemplate="let actionAudit">
+            <div class="audit-detail-field">
+                <label class="audit-detail-label">Event Created</label>
+                <span class="audit-detail-value">{{actionAudit.created | date:'MM/d/y HH:mm:ss zzzz'}}</span>
+            </div>
+            <div class="audit-detail-field">
+                <label class="audit-detail-label">Event Action</label>
+                <span class="audit-detail-value">{{actionAudit.action}}</span>
+            </div>
+            <div class="audit-detail-field">
+                <label class="audit-detail-label">Status</label>
+                <span class="audit-detail-value">{{actionAudit.status}}</span>
+            </div>
+            <div class="audit-detail-field">
+                <label class="audit-detail-label">Event Completed</label>
+                <span class="audit-detail-value">{{actionAudit.updated | date:'MM/d/y HH:mm:ss zzzz'}}</span>
+            </div>
+            <div class="audit-detail-field">
+                <label class="audit-detail-label">Drive Id</label>
+                <span class="audit-detail-value">{{actionAudit.drive.driveId}}</span>
+            </div>
+            <div class="audit-detail-field">
+                <label class="audit-detail-label">Path</label>
+                <span class="audit-detail-value">{{actionAudit.path}}</span>
+            </div>
+            <div class="audit-detail-field">
+                <label class="audit-detail-label">Dest. Drive Id</label>
+                <span class="audit-detail-value">{{actionAudit.destDriveId}}</span>
+            </div>
+            <div class="audit-detail-field">
+                <label class="audit-detail-label">Dest. Path</label>
+                <span class="audit-detail-value">{{actionAudit.destPath}}</span>
+            </div>
+            <div class="audit-detail-field">
+                <label class="audit-detail-label">Bytes Transferred</label>
+                <span class="audit-detail-value">{{actionAudit.bytesTransferred}}</span>
+            </div>
+            <div class="audit-detail-field">
+                <label class="audit-detail-label">Duration (MS)</label>
+                <span class="audit-detail-value">{{actionAudit.durationMS}}</span>
+            </div>
+            <div class="audit-detail-field">
+                <label class="audit-detail-label">Old StorageClass</label>
+                <span class="audit-detail-value">{{actionAudit.oldStorageClass}}</span>
+            </div>
+            <div class="audit-detail-field">
+                <label class="audit-detail-label">New Storage Class</label>
+                <span class="audit-detail-value">{{actionAudit.newStorageClass}}</span>
+            </div>
+            <div class="audit-detail-field">
+                <label class="audit-detail-label">Error Message</label>
+                <span class="audit-detail-value">{{actionAudit.message}}</span>
+            </div>
+            <div class="audit-detail-field">
+                <label class="audit-detail-label">Stack Trace</label>
+                <pre class="audit-detail-value">{{actionAudit.stackTrace}}</pre>
+            </div>
+        </div>
+        <kendo-grid-column field="created" title="Event Created" [width]="240">
+            <ng-template kendoGridCellTemplate let-actionAudit>
+                {{ actionAudit.created | date:'MM/d/y HH:mm:ss zzzz'}}
+            </ng-template>
+            <ng-template kendoGridFilterCellTemplate let-filter>
+                <my-datepicker-filter
+                        [filter]="filter"
+                        valueField="created">
+                </my-datepicker-filter>
+            </ng-template>
+        </kendo-grid-column>
+        <kendo-grid-column field="username" [width]="180" title="User"></kendo-grid-column>
+        <kendo-grid-column field="action" [width]="200" title="Event Action"></kendo-grid-column>
+        <kendo-grid-column field="status" [width]="160" title="Status">
+            <ng-template kendoGridCellTemplate let-actionAudit>
+                {{ actionAudit.status }}
+            </ng-template>
+            <ng-template kendoGridFilterCellTemplate let-filter>
+                <my-dropdown-filter
+                        [filter]="filter"
+                        [data]="auditStatusValues"
+                        textField="text"
+                        valueField="status">
+                </my-dropdown-filter>
+            </ng-template>
+        </kendo-grid-column>
+        <kendo-grid-column field="drive.driveId" [width]="120" title="Drive Id">
+            <ng-template kendoGridFilterMenuTemplate let-filter let-column="driveId" let-filterService="filterService">
+                <kendo-grid-numeric-filter-menu [column]="column" [filter]="filter" [filterService]="filterService">
+                </kendo-grid-numeric-filter-menu>
+            </ng-template>
+        </kendo-grid-column>
+        <kendo-grid-column field="path" title="Path"></kendo-grid-column>
+    </kendo-grid>
+</div>

@@ -1,0 +1,126 @@
+
+<div class="k-overlay" *ngIf="opened || openedDelete || openedAppInfo || openedLogout"></div>
+<header>
+  <div id="mdaca-header">
+    <div id="header-bottom">
+     <div class="add-agent-btn app-title">
+        <a href="#" >MDACA Cloud Storage Explorer</a>
+    </div>
+        <div class="add-agent-btn">
+          <button mat-menu-item (click)="addWorkspace()" tabindex="0">
+            <span class="material-icons">library_add</span>
+            <span>New Workspace</span>
+          </button>
+        </div>
+      <div class="add-agent-btn">
+        <button mat-menu-item (click)="saveWorkspace()" tabindex="0"
+                [disabled]="this.workspaceService._activeWorkspace.isDefault()">
+          <span class="material-icons">save</span>
+          <span>Save Workspace</span>
+        </button>
+      </div>
+      <div class="add-agent-btn">
+        <button mat-menu-item (click)="deleteWorkspace()" tabindex="0"
+                [disabled]="this.workspaceService._activeWorkspace.isDefault()">
+          <span class="material-icons">delete</span>
+          <span>Delete Workspace</span>
+        </button>
+      </div>
+
+      <div class="user-text"><span>{{ userText }}</span>
+        <button mat-icon-button [matMenuTriggerFor]="menu">
+        <span class="material-icons">more_vert</span>
+      </button>
+      <nav>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item
+                  (click)="open('https://mdaca.io/support/documentation/cloud-storage-explorer/', '_blank')">
+            <span class="material-icons">help</span>
+            <span>User Guide</span>
+          </button>
+          <button mat-menu-item (click)="open('https://mdaca.io/support/', '_blank')">
+            <span class="material-icons">web</span>
+            <span>Online Resources</span>
+          </button>
+          <button mat-menu-item (click)="open('https://mdaca.io/support/Training', '_blank')">
+            <span class="material-icons">speaker_notes</span>
+            <span>Training</span>
+          </button>
+          <button mat-menu-item (click)="open('https://mdaca.io/support/Feature-Request', '_blank')">
+            <span class="material-icons">question_answer</span>
+            <span>Help Us Improve</span>
+          </button>
+          <button (click)="aboutClick()" mat-menu-item>
+            <span class="material-icons">privacy_tip</span>
+            <span>About</span>
+          </button>
+          <button *ngIf="isAdmin || isDriveAdmin" mat-menu-item [routerLink]="['/admin']">
+            <span class="material-icons">settings</span>
+            <span>Administration</span>
+          </button>
+          <button mat-menu-item (click)="logout()">
+            <span class="material-icons login-icon">logout</span>
+            <span>Logout</span>
+          </button>
+        </mat-menu>
+      </nav>
+    </div>
+    </div>
+    <div id="header-nav" >
+        <ul>
+            <li id="agent-config-nav-item" routerLinkActive="active" routerLink="/home" title="Explorer Home"
+                (keydown.enter)="this.router.navigateByUrl('/home')">
+              <a >Explorer Home</a>
+            </li>
+            <li class="agent-properties-nav-item" [ngClass]="router.url.split('/')[router.url.split('/').length - 1].indexOf('workspace') == 0 && workspaceService._activeWorkspace && item.workspaceId == workspaceService._activeWorkspace.workspaceId ? 'active' : ''"
+                *ngFor="let item of this.workspaceService.workspaces"
+                [routerLink]="['/workspace', {workspaceId: item.workspaceId }]" title="Open {{item.workspaceName}}"
+                (keydown.enter)="this.router.navigateByUrl('/workspace;workspaceId=' + item.workspaceId)">
+              <a>{{item.workspaceName}}</a>
+            </li>
+        </ul>
+    </div>
+</div>
+</header>
+<kendo-window title="Save Workspace" *ngIf="opened" (close)="close()" [minWidth]="250" [width]="450">
+    <p style="margin: 30px; text-align: center;">Please specify a unique workspace name<br />(leave empty to use current name):</p>
+    <div style="margin-bottom: 12px">
+        <kendo-textbox [(ngModel)]="workspaceName" placeholder="My Workspace Name..." style="width:100%">
+        </kendo-textbox>
+    </div>
+    <p *ngIf="workspaceNameValidationFailed" style="margin: 30px; text-align: center; color: #b20000">Workspace name is already in use.</p>
+    <kendo-dialog-actions>
+        <button kendoButton [primary]="true" (click)="saveWorkspaceCommit()">Save</button>
+        <button kendoButton (click)="close()" >Cancel</button>
+    </kendo-dialog-actions>
+</kendo-window>
+<kendo-window title="Delete Workspace" *ngIf="openedDelete" (close)="closDelete()" [minWidth]="250" [width]="450">
+    <p style="margin: 30px; text-align: center;">Are you sure you want to delete {{ workspaceService._activeWorkspace.workspaceName }} ?</p>
+    <kendo-dialog-actions>
+        <button kendoButton [primary]="true" (click)="deleteWorkspaceCommit()">Delete</button>
+        <button kendoButton (click)="closDelete()" >Cancel</button>
+    </kendo-dialog-actions>
+</kendo-window>
+
+<kendo-window title="About" *ngIf="openedAppInfo" (close)="closeAppInfo()" [minWidth]="250" [width]="450">
+
+    <mat-list class="about-list">
+        <mat-list-item> <span>Licensed by</span> {{ appInfo.licensedBy }} </mat-list-item>
+        <mat-list-item> <span>License Type</span> {{ appInfo.licenseType }} </mat-list-item>
+        <mat-list-item> <span>Expiration</span> {{ appInfo.licenseExpiration }} </mat-list-item>
+        <mat-list-item> <span>Version</span> {{ appInfo.versionNumber }} </mat-list-item>
+    </mat-list>
+
+    <kendo-dialog-actions>
+        <button kendoButton [primary]="true" (click)="closeAppInfo()" >Close</button>
+    </kendo-dialog-actions>
+</kendo-window>
+
+<kendo-window title="Logout" *ngIf="openedLogout" (close)="closeLogout()" [minWidth]="250" [width]="450">
+
+    <p>In order to logout, please close your browser tab/window.</p>
+
+    <kendo-dialog-actions>
+        <button kendoButton [primary]="true" (click)="closeLogout()" >Cancel</button>
+    </kendo-dialog-actions>
+</kendo-window>

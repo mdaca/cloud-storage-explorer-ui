@@ -1,0 +1,92 @@
+<div class="k-overlay" *ngIf="errorModalOpened"></div>
+<kendo-grid #gridComponent
+            [data]="view"
+            [pageSize]="gridState.take"
+            [skip]="gridState.skip"
+            [sort]="sort"
+            [pageable]="true"
+            [sortable]="true"
+            (keyup)="updateModel()"
+            (sortChange)="sortChange($event)"
+            (pageChange)="pageChange($event)"
+            (cellClick)="cellClickHandler($event)"
+            (cellClose)="cellCloseHandler()"
+            (cancel)="cancelHandler()"
+            (save)="saveHandler($event)"
+            (remove)="removeHandler($event)"
+            (add)="addHandler()"
+            [navigable]="true"
+            [kendoGridExpandDetailsBy]="expandDetailsBy"
+            [(expandedDetailKeys)]="expandedDetailKeys">
+    <div *kendoGridDetailTemplate="let drive"
+         title="{{drive.displayName}}">
+        <div *ngIf="drive.driveId">
+            <kendo-tabstrip>
+                <kendo-tabstrip-tab [title]="'Drive Security'" [selected]="true">
+                    <ng-template kendoTabContent>
+                        <drive-security [drive]="drive" (formError)="showErrors($event)"></drive-security>
+                    </ng-template>
+                </kendo-tabstrip-tab>
+                <kendo-tabstrip-tab [title]="'Drive Properties'" *ngIf="isAdmin">
+                    <ng-template kendoTabContent>
+                        <drive-properties [drive]="drive"></drive-properties>
+                    </ng-template>
+                </kendo-tabstrip-tab>
+                <kendo-tabstrip-tab [title]="'Drive Admins'" *ngIf="isAdmin">
+                    <ng-template kendoTabContent>
+                        <drive-users [drive]="drive" (formError)="showErrors($event)"></drive-users>
+                    </ng-template>
+                </kendo-tabstrip-tab>
+            </kendo-tabstrip>
+        </div>
+        <div *ngIf="!drive.driveId">
+            <span class="save-drive-info-icon k-icon k-i-information k-i-info"></span>
+            Please save drive before modifying drive rules, properties, and admins
+        </div>
+    </div>
+    <ng-template kendoGridToolbarTemplate>
+        <button kendoGridAddCommand title="Add New Drive" *ngIf="isAdmin">Add new</button>
+        <button class='k-button' [disabled]="this.isSaved()" (click)="validatedSave()" title="Save Changes">
+            Save Changes
+        </button>
+        <button class='k-button' [disabled]="this.isSaved()" (click)="cancelChanges();" title="Cancel Changes">
+            Cancel Changes
+        </button>
+    </ng-template>
+    <kendo-grid-column field="driveId" title="Drive Id" [editable]="false"></kendo-grid-column>
+    <kendo-grid-column field="displayName" title="Display Name"></kendo-grid-column>
+    <kendo-grid-column field="driveType" title="Drive Type">
+        <ng-template kendoGridCellTemplate let-drive>
+            {{ getDriveTypeText(drive.driveType) }}
+        </ng-template>
+        <ng-template kendoGridEditTemplate let-formGroup="formGroup">
+            <kendo-dropdownlist
+                    (ngModelChange)="updateModel()"
+                    [data]="driveTypes"
+                    [textField]="'text'" [valuePrimitive]="true"
+                    [valueField]="'value'"
+                    [formControl]="formGroup.get('driveType')">
+            </kendo-dropdownlist>
+        </ng-template>
+    </kendo-grid-column>
+    <kendo-grid-command-column title="&nbsp;" [width]="220">
+        <ng-template kendoGridCellTemplate let-drive>
+            <button kendoGridSaveCommand>Add</button>
+            <button kendoGridCancelCommand>Cancel</button>
+            <button class="k-button" (click)="testConnection(drive)" title="Test Drive Connection"
+                    *ngIf="drive.driveId != 0">Test Connection
+            </button>
+            <span *ngIf="drive.connectionStatus == 'SUCCESS'" class="k-icon k-i-check text-success"></span>
+            <span *ngIf="drive.connectionStatus == 'FAILURE'" class="k-icon k-i-close text-danger"></span>
+        </ng-template>
+    </kendo-grid-command-column>
+</kendo-grid>
+<kendo-window title="Error" *ngIf="errorModalOpened" (close)="toggleErrorModal(false)">
+    <div *ngFor="let message of errorMessages"><p>{{message}}</p></div>
+
+    <div class="picker-command-buttons">
+        <div style="margin:auto">
+            <button class="center-button" kendoButton (click)="toggleErrorModal(false)">Close</button>
+        </div>
+    </div>
+</kendo-window>

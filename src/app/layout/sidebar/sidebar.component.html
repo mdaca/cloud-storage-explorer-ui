@@ -1,0 +1,23 @@
+<span #target>
+  <kendo-treeview
+    title="Click a drive to open..."
+    [nodes]="rootDriveItems"
+    textField="displayName"
+    kendoTreeViewExpandable
+    kendoTreeViewSelectable
+    kendoTreeViewHierarchyBinding
+    [hasChildren]="hasChildren"
+    [children]="fetchChildren"
+    (selectionChange)="selectDriveItem('l', $event.dataItem)"
+    style="overflow: initial">
+    <ng-template kendoTreeViewNodeTemplate let-driveItem>
+      <span class="nav-item" [attr.data-driveId]="driveItem.driveId"
+            title="Open {{driveItem.displayName}}">
+        <span [ngClass]="driveItem.getIconClass()"></span>
+        {{ driveItem.displayName }}
+      </span>
+    </ng-template>
+  </kendo-treeview>
+</span>
+<kendo-contextmenu [target]="target" filter=".nav-item" [items]="items" (select)="dropdownSelectHandler($event)">
+</kendo-contextmenu>

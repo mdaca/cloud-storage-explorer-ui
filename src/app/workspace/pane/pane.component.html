@@ -1,0 +1,302 @@
+
+
+<div class="k-overlay" *ngIf="folderPickerOpened || openedFolder || openedDelete || openedRename || openedStorageClass
+    || openedRestore || openedExtract || openedBdv"></div>
+<div class="pane-header">
+  <div class="tree-parent">
+
+    <button #anchor (click)="onToggle()" title="Select a drive..." class="k-button">
+      {{driveItem.displayPath || "Select a drive..."}}
+    </button>
+    <kendo-popup [anchor]="$any(anchor)" (anchorViewportLeave)="show = false" *ngIf="show">
+      <kendo-treeview
+        title="Click a drive to open..."
+        [nodes]="drives"
+        textField="displayName"
+        kendoTreeViewExpandable
+        kendoTreeViewSelectable
+        kendoTreeViewHierarchyBinding
+        [hasChildren]="hasChildren"
+        [children]="fetchChildren"
+        (selectionChange)="selectionEvent.emit({lr: this.lr, driveItem: $event.dataItem})">
+        <ng-template kendoTreeViewNodeTemplate let-driveItem>
+          <span class="nav-item" [attr.data-driveId]="driveItem.driveId"
+                title="Open {{driveItem.displayName}}">
+            <span [ngClass]="driveItem.getIconClass()"></span>
+            {{ driveItem.displayName }}
+          </span>
+        </ng-template>
+      </kendo-treeview>
+    </kendo-popup>
+  </div>
+  <div class="upload-parent">
+    <kendo-upload
+      title="Select or drop a file"
+      *ngIf="_driveItem.driveId"
+      [autoUpload]="false"
+      [saveUrl]="uploadSaveUrl"
+      (success)="successEventHandler($event)"
+      (error)="errorEventHandler($event)"
+      (upload)="uploadEventHandler($event)"
+      [(ngModel)]="uploadFiles"
+      [chunkable]="true">
+    </kendo-upload>
+  </div>
+  <div class="search-parent" *ngIf="driveItem.driveId">
+  <span fxLayout="column" fxFlex>
+    <kendo-textbox (valueChange)="filterKeyup($event)" [(ngModel)]="filterText"
+                   placeholder="Search current folder..." title="Search filter" style="width:100%">
+      <ng-template kendoTextBoxPrefixTemplate>
+        <span class="k-icon k-i-zoom">&nbsp;</span>
+        <kendo-textbox-separator></kendo-textbox-separator>
+      </ng-template>
+    </kendo-textbox>
+  </span>
+  <span style="margin-left: 6px" class="material-icons" title="Refresh" (click)="refresh()">
+    refresh
+  </span>
+  <span style="margin: 0 5px" class="material-icons" title="Create New Directory" (click)="openCreateDirectory()">
+    create_new_folder
+  </span>
+  </div>
+  <div class="pane-header-row" *ngIf="driveItem.driveId">
+    <div style="margin-top: -6px">
+      <span class="material-icons select-all-checkbox">
+        <mat-checkbox title="Select all files"
+                      [(ngModel)]="selectAllFlag"
+                      [indeterminate]="partialSelectAll"
+                      (ngModelChange)="selectAllChange()">
+        </mat-checkbox>
+      </span>
+    </div>
+    <div fxLayout="row" fxFlex (click)="sort('displayName')">
+      File Name
+      <span class="material-icons">
+        {{currentSort == 'displayName' ? (isAsc ? 'keyboard_arrow_up' : 'keyboard_arrow_down') : ''}}
+      </span>
+    </div>
+    <div fxLayout="row" fxFlex="160px" (click)="sort('modifiedDate')">
+      Last Modified
+      <span class="material-icons">
+        {{currentSort == 'modifiedDate' ? (isAsc ? 'keyboard_arrow_up' : 'keyboard_arrow_down') : ''}}
+      </span>
+    </div>
+    <div fxLayout="row" fxFlex="80px" (click)="sort('fileSize')">
+      File Size
+      <span class="material-icons">
+        {{currentSort == 'fileSize' ? (isAsc ? 'keyboard_arrow_up' : 'keyboard_arrow_down') : ''}}
+      </span>
+    </div>
+    <div fxLayout="row" fxFlex="150px" (click)="sort('storageClass')">
+      Storage Class
+      <span class="material-icons">
+        {{currentSort == 'storageClass' ? (isAsc ? 'keyboard_arrow_up' : 'keyboard_arrow_down') : ''}}
+      </span>
+    </div>
+  </div>
+</div>
+<div cdkDropList (cdkDropListDropped)="drop($event)" style="flex: 1 1 auto;">
+  <div *ngIf="_driveItem.loading" class="k-i-loading spinner-bg"></div>
+  <cdk-virtual-scroll-viewport itemSize="20" style="height: calc(100%); width:100%; overflow-y: auto;">
+    <app-pane-item [upDirItem]=true
+                   (driveSelected)="itemChanged($event, true)"
+                   *ngIf="driveItem.path && driveItem.path != '/' && driveItem.path.indexOf('/') != -1"
+                   [parent]="driveItem">
+    </app-pane-item>
+    <app-pane-item [filterText]="filterText"
+                   [upDirItem]=false
+                   [cdkDragData]="item"
+                   (itemEventSelected)="itemEventSelected($event)"
+                   (checkboxToggled)="checkboxToggled()"
+                   (driveSelected)="itemChanged($event, false)"
+                   [parent]="driveItem"
+                   [cdkDragDisabled]="_driveItem.loading"
+                   [disabled]="_driveItem.loading"
+                   *cdkVirtualFor="let item of driveItem.items | callback: filterText"
+                   [driveItem]=item cdkDrag></app-pane-item>
+  </cdk-virtual-scroll-viewport>
+</div>
+<div class="pane-footer" *ngIf="_driveItem && _driveItem.items && _driveItem.items.length > 0" >
+  <div class="pane-footer-text-item" ><span class="item-count">{{driveItem.itemCount(filterText) | number}}</span> items visible</div>
+  <div class="pane-footer-text-item" ><span class="item-count">{{driveItem.folderCount(filterText) | number}}</span> folders</div>
+  <div class="pane-footer-text-item" ><span class="item-count">{{driveItem.checkedCount(filterText) | number}}</span> checked items</div>
+</div>
+<kendo-window title="{{this.currentAction}}" *ngIf="folderPickerOpened" [(left)]="left"
+              [(top)]="top" (close)="cancelPath()"
+              [minHeight]="200"
+              [minWidth]="250"
+              (dragEnd)="onEndDrag()">
+  <div class="picker-selected-folder">
+    <span>Selected folder: {{selectedPickerText}}</span>
+  </div>
+  <kendo-treeview
+    [nodes]="drives"
+    textField="displayName"
+    kendoTreeViewExpandable
+    kendoTreeViewSelectable
+    kendoTreeViewHierarchyBinding
+    [hasChildren]="hasChildren"
+    [children]="fetchChildren"
+    (selectionChange)="handlePickerSelection($event.dataItem)"
+    style="overflow: initial">
+  </kendo-treeview>
+
+  <div class="folder-picker-footer">
+    <span style="padding: 0 0 5px 0">
+      {{this.currentAction}} the selected {{this.getSelectedItems().length}} item(s)
+    </span>
+    <div fxLayout="column" style="padding: 5px 0"
+         *ngIf="selectedPickerText && (fileNameAlreadyExists || validatingFolderPicker || isSameFileLocation)">
+      <small *ngIf="fileNameAlreadyExists" id="fileExistsError2" class="text-danger">
+        File with the same name already exists.
+      </small>
+      <small *ngIf="isSameFileLocation" id="sameFileError" class="text-danger">
+        New location must be different than the selected file(s)
+      </small>
+      <small *ngIf="validatingFolderPicker" id="testingExistsInfo" class="text-info">
+        Checking...
+      </small>
+    </div>
+    <div class="picker-command-buttons" style="padding: 10px 0 0;">
+      <div fxLayout="column" fxFlex="100px">
+        <button kendoButton [disabled]="selectedPickerText == '' || fileNameAlreadyExists || isSameFileLocation || validatingFolderPicker"
+                [primary]="true" (click)="transferCommit()" class="center-button">
+          OK
+        </button>
+      </div>
+      <div fxLayout="column" fxFlex="80px" [style.margin-left]="'10px'">
+        <button kendoButton class="center-button" (click)="cancelPath()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</kendo-window>
+<kendo-window title="Delete Item" *ngIf="openedDelete" (close)="closeDelete()" [(left)]="left" [(top)]="top"
+              (dragEnd)="onEndDrag()">
+  <p class="modal-text">Are you sure you want to permanently delete these {{this.getSelectedItems().length}} item(s)?</p>
+
+  <div class="picker-command-buttons">
+    <button kendoButton class="left-btn button-danger" [primary]="true" (click)="deleteCommit()">Delete</button>
+    <button kendoButton class="right-btn" (click)="closeDelete()">Cancel</button>
+  </div>
+</kendo-window>
+<kendo-window title="Error in Extracting" *ngIf="openedExtract" (close)="closeExtract()" [(left)]="left"
+              [(top)]="top"
+              (dragEnd)="onEndDrag()">
+  <p class="modal-text">Item(s) have already been extracted.</p>
+
+  <div class="picker-command-buttons">
+    <div style="margin:auto" fxLayout="column" fxFlex="100px">
+      <button class="center-button" kendoButton (click)="closeExtract()">Close</button>
+    </div>
+  </div>
+</kendo-window>
+<kendo-window title="Rename" *ngIf="openedRename" (close)="closeRename()" [(left)]="left"
+              [(top)]="top"
+              (dragEnd)="onEndDrag()">
+  <div class="modal-text">Please specify a new name:</div>
+  <div style="padding: 0 12px 12px; width:100%;">
+    <form class="k-form" [formGroup]="form">
+      <kendo-formfield>
+        <kendo-label [for]="fileName" text="File name"></kendo-label>
+        <kendo-textbox #fileName formControlName="fileName"></kendo-textbox>
+        <kendo-formerror *ngIf="containsSlashes(form.value.fileName)">New file name cannot contain slashes ('/' or '\').</kendo-formerror>
+        <kendo-formerror *ngIf="isEmpty(form.value.fileName)">New file name cannot be empty.</kendo-formerror>
+        <kendo-formerror *ngIf="driveItem.fileNameExists(form.value.fileName)">File or folder already exists.</kendo-formerror>
+      </kendo-formfield>
+    </form>
+  </div>
+  <div class="picker-command-buttons">
+    <button kendoButton class="left-btn" [disabled]="!form.valid" [primary]="true" (click)="renameCommit()">
+      Rename
+    </button>
+    <button kendoButton class="right-btn" (click)="closeRename()">Cancel</button>
+  </div>
+</kendo-window>
+<kendo-window title="Create Directory" *ngIf="openedFolder" (close)="closeFolder()" [(left)]="left"
+              [(top)]="top"
+              (dragEnd)="onEndDrag()">
+  <div class="modal-text">Please specify a directory name:</div>
+  <div style="padding: 0 12px 12px; width:100%;">
+    <form class="k-form" [formGroup]="form">
+      <kendo-formfield>
+        <kendo-label [for]="folderName" text="Folder name"></kendo-label>
+        <kendo-textbox #folderName formControlName="folderName"></kendo-textbox>
+        <kendo-formerror *ngIf="containsSlashes(form.value.folderName)">New folder name cannot contain slashes ('/' or '\').</kendo-formerror>
+        <kendo-formerror *ngIf="isEmpty(form.value.folderName)">New folder name cannot be empty.</kendo-formerror>
+        <kendo-formerror *ngIf="driveItem.fileNameExists(form.value.folderName)">Folder or file already exists.</kendo-formerror>
+      </kendo-formfield>
+    </form>
+  </div>
+  <div class="picker-command-buttons">
+    <button kendoButton class="left-btn" [disabled]="!form.valid" [primary]="true" (click)="folderCommit()">
+      Create
+    </button>
+    <button kendoButton class="right-btn" (click)="closeFolder()">Cancel</button>
+  </div>
+</kendo-window>
+<kendo-window title="Change Storage Class" *ngIf="openedStorageClass" (close)="closeStorageClass()" [(left)]="left"
+              [(top)]="top"
+              (dragEnd)="onEndDrag()">
+  <p class="modal-text">Please choose a storage class for the selected {{this.getSelectedItems().length}} file(s):</p>
+  <div id="storage-class-modal-contents">
+    <mat-radio-group [(ngModel)]="selectedStorageClass" style="margin-bottom: 0">
+      <div *ngFor="let sc of driveStorageClasses">
+        <mat-radio-button [value]="sc">{{sc.displayText}}</mat-radio-button>
+      </div>
+    </mat-radio-group>
+  </div>
+  <div class="picker-command-buttons">
+    <button kendoButton class="left-btn" [disabled]="selectedStorageClass == null" [primary]="true" (click)="storageClassCommit()">
+      OK
+    </button>
+    <button kendoButton class="right-btn" (click)="closeStorageClass()">Cancel</button>
+  </div>
+</kendo-window>
+<kendo-window title="Restore" *ngIf="openedRestore" (close)="closeRestore()" [(left)]="left"
+              [(top)]="top"
+              (dragEnd)="onEndDrag()">
+    <p class="modal-text" style="margin-bottom: 10px;">How many days should the {{this.getSelectedItems().length}} file(s) be available for once restored?</p>
+
+  <div style="padding: 0 12px 25px; width:100%;">
+    <form class="k-form" [formGroup]="form">
+      <kendo-formfield>
+        <kendo-label [for]="expirationDays" text="Expire days"></kendo-label>
+        <kendo-numerictextbox #expirationDays formControlName="expirationDays" [format]="'n0'" [min]="1"></kendo-numerictextbox>
+        <kendo-formerror>Expire days must be 1 or greater</kendo-formerror>
+      </kendo-formfield>
+    </form>
+  </div>
+  <div class="picker-command-buttons" style="padding: 0 10px">
+    <button kendoButton class="left-btn" [primary]="true"
+            [disabled]="!this.form.valid"
+            (click)="restoreCommit()">Restore</button>
+    <button kendoButton class="right-btn" (click)="closeRestore()">Cancel</button>
+  </div>
+</kendo-window>
+<kendo-window title="{{currentAction}}" *ngIf="openedBdv" (close)="closeBdv()" [(left)]="left"
+              [(top)]="top"
+              (dragEnd)="onEndDrag()">
+  <p class="modal-text" style="margin-bottom: 10px;">Set database and table name for this file.</p>
+
+  <div style="padding: 0 12px 12px; width:100%;">
+    <form class="k-form" [formGroup]="form">
+      <kendo-formfield>
+        <kendo-label [for]="databaseName" text="Database Name"></kendo-label>
+        <kendo-textbox #databaseName formControlName="databaseName"></kendo-textbox>
+        <kendo-formerror>Database name is required</kendo-formerror>
+      </kendo-formfield>
+      <kendo-formfield>
+        <kendo-label [for]="tableName" text="Table Name"></kendo-label>
+        <kendo-textbox #tableName formControlName="tableName"></kendo-textbox>
+        <kendo-formerror>Table name is required</kendo-formerror>
+      </kendo-formfield>
+    </form>
+  </div>
+
+  <div class="picker-command-buttons">
+    <button kendoButton class="left-btn" [primary]="true" [disabled]="!this.form.valid"
+            (click)="addToBdvCommit()">Save
+    </button>
+    <button kendoButton class="right-btn" (click)="closeBdv()">Cancel</button>
+  </div>
+</kendo-window>

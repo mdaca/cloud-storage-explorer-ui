@@ -1,0 +1,94 @@
+//scrolling occurs on the admin.component itself
+//hiding the overflow on the body prevents the line graph tooltip popup from displaying the body overflow
+body {
+  overflow: hidden;
+}
+
+.drive-metrics-splitter {
+  height: 739px;
+
+  > kendo-splitter-pane {
+    height: 369px;
+  }
+}
+
+kendo-splitter {
+  height: 100%;
+}
+
+.filter-fields {
+  height: 40px;
+  margin: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.label {
+  color: #656565;
+  padding: 0 10px 0 0;
+}
+
+.sticky-button-group {
+  position: sticky;
+  top: 0;
+  padding: 10px;
+  background: white;
+  z-index: 10;
+
+  button {
+    margin-right: 10px
+  }
+}
+
+#usageDataErrorMessage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  .material-icons {
+    padding-top: -44px;
+    width: 53px;
+    color: #ffca23;
+    font-size: 33px;
+  }
+
+  div {
+    font-size: 15px;
+    margin-top: -29px;
+    display: inline-block;
+    top: 50%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+  }
+}
+
+#folder-title {
+  height: 47px;
+  padding: 9px 9px 0;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.error-message {
+  height: 80%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  span {
+    padding: 20px;
+    font-size: 27px;
+  }
+
+  div {
+    display: inline-block;
+    font-size: 15px;
+  }
+}
+
+//ensures that the sticky buttons ("return to root", and "go up directory") don't cover
+//the treeItem when element.scrollIntoView() is called
+span {
+  scroll-margin-top: 100px;
+}

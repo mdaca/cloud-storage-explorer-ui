@@ -1,0 +1,22 @@
+<kendo-splitter fxFlex orientation="vertical" fxLayout="column">
+  <kendo-splitter-pane size="90%">
+    <kendo-splitter fxLayout="row" fxFlex>
+      <kendo-splitter-pane style="overflow: auto" size="300px" [collapsible]="true">
+        <app-sidebar [rootDriveItems]="drives"></app-sidebar>
+      </kendo-splitter-pane>
+      <kendo-splitter-pane class="content" fxLayout="column" fxFlex>
+        <kendo-splitter fxLayout="row" cdkDropListGroup fxFlex>
+          <kendo-splitter-pane size="50%">
+            <app-pane lr="l" [config]="config" [driveItem]="leftDrive"></app-pane>
+          </kendo-splitter-pane>
+          <kendo-splitter-pane>
+            <app-pane lr="r" [config]="config" [driveItem]="rightDrive"></app-pane>
+          </kendo-splitter-pane>
+        </kendo-splitter>
+      </kendo-splitter-pane>
+    </kendo-splitter>
+  </kendo-splitter-pane>
+  <kendo-splitter-pane style="overflow: hidden">
+    <app-footer></app-footer>
+  </kendo-splitter-pane>
+</kendo-splitter>

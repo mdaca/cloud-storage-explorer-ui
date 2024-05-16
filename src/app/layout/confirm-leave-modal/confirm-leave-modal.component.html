@@ -1,0 +1,14 @@
+<kendo-window title="Confirm Save Changes"
+              [width]="width"
+              [left]="left"
+              [resizable]="false"
+              (close)="bsModalRef.hide()">
+  <p class="modal-text">The form has not been submitted yet. Do you really want to leave the page?</p>
+  <div class="picker-command-buttons">
+    <button kendoButton class="" (click)="cancel()">Cancel</button>
+    <button kendoButton class="" (click)="discardAndExit()">Discard and Exit</button>
+    <button kendoButton class="" (click)="saveAndExit()">Save and Exit</button>
+  </div>
+</kendo-window>
+
+
